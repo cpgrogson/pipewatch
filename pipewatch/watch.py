@@ -23,7 +23,11 @@ def run_single_check(
     all_alerts: List[Alert] = []
 
     for pipeline in pipelines:
-        metrics: PipelineMetrics = metrics_fn(pipeline.name)
+        try:
+            metrics: PipelineMetrics = metrics_fn(pipeline.name)
+        except Exception as exc:
+            logger.error("Failed to fetch metrics for pipeline '%s': %s", pipeline.name, exc)
+            continue
         alerts = check_thresholds(metrics, pipeline.thresholds)
         pr = PipelineReport(pipeline_name=pipeline.name, metrics=metrics, alerts=alerts)
         report.add(pr)
