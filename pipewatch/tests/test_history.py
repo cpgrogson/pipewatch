@@ -83,3 +83,13 @@ def test_tags_persisted(tmp_path):
 
     s2 = HistoryStore(path=path)
     assert s2.all()[0].tags == ["prod", "critical"]
+
+
+def test_record_multiple_entries_preserves_order(store):
+    """Entries should be returned in insertion order."""
+    store.record(make_entry(name="first", alert_count=0))
+    store.record(make_entry(name="second", alert_count=1))
+    store.record(make_entry(name="third", alert_count=2))
+
+    entries = store.all()
+    assert [e.pipeline_name for e in entries] == ["first", "second", "third"]
