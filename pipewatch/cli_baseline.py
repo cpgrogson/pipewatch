@@ -17,7 +17,11 @@ def capture_baseline(history: str, baseline_path: str):
     """Capture current aggregated metrics as baseline."""
     hs = HistoryStore(history)
     bs = BaselineStore(baseline_path)
-    report = aggregate(hs.all())
+    runs = hs.all()
+    if not runs:
+        click.echo("No history found. Run some pipelines before capturing a baseline.", err=True)
+        raise click.Abort()
+    report = aggregate(runs)
     for trend in report.trends:
         entry = BaselineEntry(
             pipeline=trend.pipeline,
@@ -38,7 +42,11 @@ def show_drift(history: str, baseline_path: str, threshold: float):
     """Show drift between current metrics and baseline."""
     hs = HistoryStore(history)
     bs = BaselineStore(baseline_path)
-    report = aggregate(hs.all())
+    runs = hs.all()
+    if not runs:
+        click.echo("No history found. Nothing to compare against baseline.", err=True)
+        raise click.Abort()
+    report = aggregate(runs)
     found = False
     for trend in report.trends:
         current = BaselineEntry(
