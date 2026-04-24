@@ -56,6 +56,18 @@ def test_store_filters_silenced_alerts():
     assert result[0].pipeline == "etl_orders"
 
 
+def test_store_filters_all_alerts_when_wildcard_rule_present():
+    """A wildcard SilenceRule (no pipeline/metric) should silence every alert."""
+    store = SilenceStore()
+    alerts = [
+        Alert(pipeline="etl_sales", metric="error_rate", value=0.2, threshold=0.1, severity="warning"),
+        Alert(pipeline="etl_orders", metric="duration", value=300, threshold=120, severity="critical"),
+    ]
+    store.add(SilenceRule())  # wildcard — matches anything
+    result = store.filter_alerts(alerts)
+    assert result == []
+
+
 def test_store_remove_expired():
     store = SilenceStore()
     past = datetime.utcnow() - timedelta(hours=1)
