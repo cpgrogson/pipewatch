@@ -37,6 +37,14 @@ def test_alert_not_duplicate_after_cooldown(store, alert):
     assert store.is_duplicate(alert, later) is False
 
 
+def test_alert_exactly_at_cooldown_boundary(store, alert):
+    """An alert fired exactly at the cooldown boundary should not be a duplicate."""
+    now = datetime(2024, 1, 1, 12, 0, 0)
+    store.record(alert, now)
+    exactly_at_boundary = now + timedelta(minutes=30)
+    assert store.is_duplicate(alert, exactly_at_boundary) is False
+
+
 def test_different_pipelines_not_duplicate(store):
     now = datetime(2024, 1, 1, 12, 0, 0)
     a1 = Alert(pipeline="pipe_a", metric="error_rate", value=0.2, threshold=0.1)
