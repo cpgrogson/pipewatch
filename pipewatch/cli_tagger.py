@@ -46,6 +46,22 @@ def list_tag_rules():
         click.echo(f"[{i}] pipeline={r['pipeline']} metric={r['metric']} tags={r['tags']}")
 
 
+@tagger_cmd.command("remove")
+@click.argument("index", type=int)
+def remove_tag_rule(index: int):
+    """Remove a tagging rule by its index (see 'tagger list')."""
+    rules = _load_rules()
+    if not rules:
+        click.echo("No tagging rules defined.")
+        return
+    if index < 0 or index >= len(rules):
+        click.echo(f"Error: index {index} is out of range (0-{len(rules) - 1}).", err=True)
+        raise SystemExit(1)
+    removed = rules.pop(index)
+    _save_rules(rules)
+    click.echo(f"Removed rule [{index}]: pipeline={removed['pipeline']} metric={removed['metric']} tags={removed['tags']}")
+
+
 @tagger_cmd.command("clear")
 def clear_tag_rules():
     """Clear all tagging rules."""
