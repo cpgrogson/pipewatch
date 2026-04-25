@@ -41,9 +41,26 @@ class CorrelationRule:
     min_alerts: int = 2
 
 
+VALID_GROUP_BY_FIELDS = frozenset({"metric", "severity", "pipeline"})
+
+
 class AlertCorrelator:
     def __init__(self, rules: Optional[List[CorrelationRule]] = None):
         self.rules: List[CorrelationRule] = rules or []
+        self._validate_rules()
+
+    def _validate_rules(self) -> None:
+        """Raise ValueError if any rule references an unsupported group_by field."""
+        for rule in self.rules:
+            if rule.group_by not in VALID_GROUP_BY_FIELDS:
+                raise ValueError(
+                    f"Invalid group_by field '{rule.group_by}'. "
+                    f"Must be one of: {', '.join(sorted(VALID_GROUP_BY_FIELDS))}"
+                )
+            if rule.min_alerts < 1:
+                raise ValueError(
+                    f"min_alerts must be at least 1, got {rule.min_alerts}"
+                )
 
     def correlate(self, alerts: List[Alert]) -> List[Incident]:
         """Group alerts into incidents based on configured rules."""
