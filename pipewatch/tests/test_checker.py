@@ -74,3 +74,16 @@ def test_alert_str_format(thresholds):
     alerts = check_thresholds(metrics, thresholds)
     assert "etl_daily" in str(alerts[0])
     assert "duration_seconds" in str(alerts[0])
+
+
+def test_alert_on_boundary_values(thresholds):
+    """Metrics exactly at threshold boundaries should not trigger alerts."""
+    metrics = PipelineMetrics(
+        pipeline_name="etl_daily",
+        duration_seconds=300.0,
+        error_rate=0.05,
+        rows_processed=100,
+        lag_seconds=60.0,
+    )
+    alerts = check_thresholds(metrics, thresholds)
+    assert alerts == []
