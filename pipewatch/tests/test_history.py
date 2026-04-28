@@ -76,6 +76,17 @@ def test_clear_removes_all_entries(store):
     assert store.all() == []
 
 
+def test_clear_persists_to_disk(tmp_path):
+    """Clearing the store should persist the empty state so a reloaded store is also empty."""
+    path = str(tmp_path / "history.json")
+    s1 = HistoryStore(path=path)
+    s1.record(make_entry(name="pipe"))
+    s1.clear()
+
+    s2 = HistoryStore(path=path)
+    assert s2.all() == []
+
+
 def test_tags_persisted(tmp_path):
     path = str(tmp_path / "history.json")
     s1 = HistoryStore(path=path)
